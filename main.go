@@ -29,8 +29,8 @@ func main() {
 }
 
 func receive(ctx context.Context, event cloudevents.Event) (*event.Event, protocol.Result) {
-	if event.Type() == "com.example.button.clicked" {
-		log.Printf("Hello, %s", event)
+	if event.Type() == "com.bnova.techhub.button.clicked" {
+		log.Printf("Received event, %s", event)
 		data := &ButtonEvent{}
 		err := event.DataAs(data)
 		if err != nil {
@@ -39,31 +39,38 @@ func receive(ctx context.Context, event cloudevents.Event) (*event.Event, protoc
 
 		log.Println(data.Clicked)
 
-		c, err := cloudevents.NewClientHTTP()
-		if err != nil {
-			log.Fatalf("failed to create client, %v", err)
-		}
-
-		// Create an Event.
-		ce := cloudevents.NewEvent()
-		ce.SetSource("example/uri")
-		ce.SetType("example.type")
-		ce.SetData(cloudevents.ApplicationJSON, data)
-
-		// Set a target.
-		ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8081/")
-
-		// Send that Event.
-		if result := c.Send(ctx, ce); cloudevents.IsUndelivered(result) {
-			log.Fatalf("failed to send, %v", result)
-		} else {
-			log.Printf("sent: %v", ce)
-			log.Printf("result: %v", result)
-		}
+		sendCloudEvent(data)
 	} else {
 		log.Printf("Unknown type, %s", event)
 
 		return nil, cloudevents.NewHTTPResult(500, "Blöd gelaufen")
 	}
 	return nil, nil
+}
+
+func sendCloudEvent(data *ButtonEvent) {
+	c, err := cloudevents.NewClientHTTP()
+	if err != nil {
+		log.Fatalf("failed to create client, %v", err)
+	}
+
+	// Create an Event.
+	ce := cloudevents.NewEvent()
+	ce.SetSource("cloud-events-example-go")
+	ce.SetType("com.bnova.techhub.button.clicked")
+	if err := ce.SetData(cloudevents.ApplicationJSON, data); err != nil {
+		log.Fatalf("failed to set data, %v", err)
+	}
+	ce.SetID("abc")
+
+	// Set a target.
+	ctx := cloudevents.ContextWithTarget(cloudevents.WithEncodingStructured(context.Background()), "http://localhost:8081/")
+
+	// Send that Event.
+	if result := c.Send(ctx, ce); cloudevents.IsUndelivered(result) {
+		log.Fatalf("failed to send, %v", result)
+	} else {
+		log.Printf("sent: %v", ce)
+		log.Printf("result: %v", result)
+	}
 }
