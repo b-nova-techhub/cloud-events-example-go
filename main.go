@@ -62,7 +62,7 @@ func sendCloudEvent(data *ButtonEvent) {
 	}
 	ce.SetID("abc")
 
-	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8081/")
+	ctx := cloudevents.ContextWithTarget(cloudevents.WithEncodingStructured(context.Background()), "http://localhost:8081/")
 
 	if result := c.Send(ctx, ce); cloudevents.IsUndelivered(result) {
 		log.Fatalf("failed to send, %v", result)
