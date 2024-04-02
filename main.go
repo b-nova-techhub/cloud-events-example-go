@@ -54,7 +54,6 @@ func sendCloudEvent(data *ButtonEvent) {
 		log.Fatalf("failed to create client, %v", err)
 	}
 
-	// Create an Event.
 	ce := cloudevents.NewEvent()
 	ce.SetSource("cloud-events-example-go")
 	ce.SetType("com.bnova.techhub.button.clicked")
@@ -63,10 +62,8 @@ func sendCloudEvent(data *ButtonEvent) {
 	}
 	ce.SetID("abc")
 
-	// Set a target.
-	ctx := cloudevents.ContextWithTarget(cloudevents.WithEncodingStructured(context.Background()), "http://localhost:8081/")
+	ctx := cloudevents.ContextWithTarget(context.Background(), "http://localhost:8081/")
 
-	// Send that Event.
 	if result := c.Send(ctx, ce); cloudevents.IsUndelivered(result) {
 		log.Fatalf("failed to send, %v", result)
 	} else {
