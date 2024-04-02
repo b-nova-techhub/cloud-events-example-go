@@ -1,0 +1,68 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/pkg/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Project-specific .env files
+.env
+
+# Dependency directories (remove the `#` to include it)
+# /vendor/
+
+# Editor directories and files
+.idea/
+*.iml
+*.swp
+*.swo
+.vscode/
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled Object files, Static and Dynamic libs (Shared Objects)
+*.o
+*.a
+*.ko
+*.obj
+*.elf
+*.lib
+*.d
+*.dll
+*.dylib
+*.so
+*.iso
+*.tar.gz
+*.zip
+*.rar
+*.tar
+*.tar.xz
+*.tgz
+*.gzip
+*.bzip2
+*.7z
+
+# Logs
+*.log
+
+# Sqlite database files
+*.db
+*.sql
+*.sqlite
+
+# Certificate files
+*.pem
+*.crt
+*.cer
+*.key
