@@ -39,7 +39,7 @@ func receive(ctx context.Context, event cloudevents.Event) (*event.Event, protoc
 			log.Printf("failed to get data as ButtonEvent: %s", err)
 		}
 
-		sendCloudEvent(data, "com.bnova.techhub.button.clicked")
+		sendCloudEvent(event, "com.bnova.techhub.button.clicked")
 	} else if event.Type() == "com.bnova.techhub.get.activity" {
 		log.Printf("Received event, %s", event)
 		data := &ButtonEvent{}
@@ -50,17 +50,15 @@ func receive(ctx context.Context, event cloudevents.Event) (*event.Event, protoc
 
 		if data.Clicked {
 			log.Printf("Querying activity")
-			result := sendCloudEvent(data, "com.bnova.techhub.get.activity")
+			result := sendCloudEvent(event, "com.bnova.techhub.get.activity")
 			log.Printf("Result: %s", result)
 
-			ce := cloudevents.NewEvent()
-			ce.SetSource("cloud-events-example-go")
-			ce.SetType("com.bnova.techhub.get.activity")
-			if err := ce.SetData(cloudevents.ApplicationJSON, result); err != nil {
+			event.SetSource("cloud-events-example-go")
+			event.SetType("com.bnova.techhub.get.activity")
+			if err := event.SetData(cloudevents.ApplicationJSON, result); err != nil {
 				log.Fatalf("failed to set data, %v", err)
 			}
-			ce.SetID("abc")
-			return &ce, nil
+			return &event, nil
 		}
 	} else {
 		log.Printf("Unknown type, %s", event)
@@ -70,23 +68,18 @@ func receive(ctx context.Context, event cloudevents.Event) (*event.Event, protoc
 	return nil, nil
 }
 
-func sendCloudEvent(data *ButtonEvent, eventType string) *event.Event {
+func sendCloudEvent(event cloudevents.Event, eventType string) *event.Event {
 	c, err := cloudevents.NewClientHTTP()
 	if err != nil {
 		log.Fatalf("failed to create client, %v", err)
 	}
 
-	ce := cloudevents.NewEvent()
-	ce.SetSource("cloud-events-example-go")
-	ce.SetType(eventType)
-	if err := ce.SetData(cloudevents.ApplicationJSON, data); err != nil {
-		log.Fatalf("failed to set data, %v", err)
-	}
-	ce.SetID("abc")
+	event.SetSource("cloud-events-example-go")
+	event.SetType(eventType)
 
 	ctx := cloudevents.ContextWithTarget(cloudevents.WithEncodingStructured(context.Background()), "http://localhost:8081/")
 
-	resp, result := c.Request(ctx, ce)
+	resp, result := c.Request(ctx, event)
 	if cloudevents.IsUndelivered(result) {
 		log.Printf("Failed to deliver request: %v", result)
 	} else {
